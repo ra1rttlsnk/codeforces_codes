@@ -39,7 +39,55 @@ void count_sort(vector<pair<pair<int, int>, int>> &p) {
     p = p_new;
 }
 
-string substring_search(string &original, string &query, vector<pair<pair<int, int>, int>> &p) {
+int upper_bound_finder(string &original, 
+						string &query, 
+						vector<pair<pair<int, int>, int>> &p, 
+						int mid, 
+						int last) 
+{
+    int upper_bound = mid;
+	int first = mid+1;
+	mid = (first+last)/2;
+	while (first <= last) {
+		int comp = original.compare(p[mid].second, query.size(), query);
+		if (comp == 0){
+			upper_bound = mid;
+			first = mid+1;
+			mid = (first+last)/2;
+		}
+		else if(comp > 0) {
+			last = mid-1;
+			mid = (first+last)/2;
+		}
+	}
+	return upper_bound;
+}
+
+int lower_bound_finder(string &original, 
+						string &query, 
+						vector<pair<pair<int, int>, int>> &p, 
+						int mid, 
+						int first) 
+{
+    int lower_bound = mid;
+	int last = mid-1;
+	mid = (first+last)/2;
+	while (first <= last) {
+		int comp = original.compare(p[mid].second, query.size(), query);
+		if (comp == 0){
+			lower_bound = mid;
+			last = mid-1;
+			mid = (first+last)/2;
+		}
+		else if(comp < 0) {
+			first = mid+1;
+			mid = (first+last)/2;
+		}
+	}
+	return lower_bound;
+}
+
+int substring_search(string &original, string &query, vector<pair<pair<int, int>, int>> &p) {
     int query_length = query.size();
     int first = 0;
     int last = original.size()-1;
@@ -47,7 +95,9 @@ string substring_search(string &original, string &query, vector<pair<pair<int, i
     while (first <= last) {
         int comp = original.compare(p[mid].second, query_length, query);
         if (comp == 0){
-            return "Yes";
+            int upper_bound = upper_bound_finder(original, query, p, mid, last);
+			int lower_bound = lower_bound_finder(original, query, p, mid, first);
+			return upper_bound-lower_bound+1;
         }
         else if(comp > 0) {
             last = mid-1;
@@ -59,8 +109,10 @@ string substring_search(string &original, string &query, vector<pair<pair<int, i
         }
         
     }
-    return "No";
+    return 0;
 }
+
+
 
 int main() {
     string s;
