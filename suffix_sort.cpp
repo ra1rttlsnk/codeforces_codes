@@ -39,27 +39,15 @@ void count_sort(vector<pair<pair<int, int>, int>> &p) {
     p = p_new;
 }
 
-int substring_search(string &original, string &query, vector<pair<pair<int, int>, int>> &p) {
+string substring_search(string &original, string &query, vector<pair<pair<int, int>, int>> &p) {
     int query_length = query.size();
     int first = 0;
     int last = original.size()-1;
     int mid = (first+last)/2;
-    int count = 0;
     while (first <= last) {
         int comp = original.compare(p[mid].second, query_length, query);
         if (comp == 0){
-            count++;
-            for (int i = 1; mid-i >= first; i++) {
-                if (original.compare(p[mid-i].second, query_length, query) == 0)
-                    count++;
-                else break;
-            }
-            for (int i = 1; mid+i <= last; i++) {
-                if (original.compare(p[mid+i].second, query_length, query) == 0)
-                    count++;
-                else break;
-            }
-            return count;
+            return "Yes"
         }
         else if(comp > 0) {
             last = mid-1;
@@ -71,7 +59,7 @@ int substring_search(string &original, string &query, vector<pair<pair<int, int>
         }
         
     }
-    return count;
+    return "No";
 }
 
 int main() {
