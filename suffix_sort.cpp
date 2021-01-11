@@ -47,7 +47,7 @@ string substring_search(string &original, string &query, vector<pair<pair<int, i
     while (first <= last) {
         int comp = original.compare(p[mid].second, query_length, query);
         if (comp == 0){
-            return "Yes"
+            return "Yes";
         }
         else if(comp > 0) {
             last = mid-1;
