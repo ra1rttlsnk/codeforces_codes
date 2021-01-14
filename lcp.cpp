@@ -1,7 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
+#include <bits/stdc++.h>
 using namespace std;
 
 void radix_sort(vector<pair<char, int>> &a) {
@@ -112,6 +109,20 @@ int substring_search(string &original, string &query, vector<pair<pair<int, int>
     return 0;
 }
 
+vector<int> LCP(string &s, vector<pair<pair<int, int>, int>> &p, int c[]) {
+    int k = 0;
+    int n = s.length();
+    vector<int> lcp(n);
+    for (int i = 0; i < n-1; i++) {
+	    int pi = c[i];
+	    int j = p[pi-1].second;
+	    while(s[i+k] == s[j+k])k++;
+	    lcp[pi] = k;
+	    k = max(k-1, 0);
+    }
+    return lcp;
+}
+
 
 
 int main() {
@@ -154,11 +165,6 @@ int main() {
         }
         
         count_sort(p);
-        /*cout << "----" << endl;
-        for (int i = 0; i < n; i++) {
-            cout << p[i].first.first << endl;
-        }
-        cout << "----" << endl;*/
         c[p[0].second] = 0;
         for (int i = 1; i < n; i++) {
             if (p[i].first == p[i-1].first)
@@ -167,11 +173,12 @@ int main() {
         }
         k *= 2;
     }
-    int q;
-    cin >> q;
-    string query;
-    for (int i = 0; i < q; i++) {
-        cin >> query;
-        cout << substring_search(s, query, p) << endl;
+    vector<int> lcp = LCP(s, p, c);
+    for (int i = 0; i < n; i++) {
+        cout << p[i].second << " ";
+    }
+    cout << endl;
+    for (int i = 1; i < n; i++) {
+        cout << lcp[i] << " ";
     }
 }
