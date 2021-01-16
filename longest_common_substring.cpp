@@ -133,17 +133,29 @@ long long number_of_different_substrings(string &s, vector<pair<pair<int, int>, 
     return sum;
 }
 
-string LCS(string &s1, string &s2, vector<pair<pair<int, int>, int>> &p, vector<int> &lcp) {
+string LCS(string &s, string &s1, string &s2, vector<pair<pair<int, int>, int>> &p, vector<int> &lcp) {
     int margin = s1.length();
     int max = 0;
-    for (int i=2; i < s1.length()+s2.length(); i++) {
-	if (lcp[i] > max) {
-	   int c1 = p[i].second < margin? 0 : 1;
-	   int c2 = p[i+1].second < margin? 0 : 1;
-	   if (c1 != c2)
-		max = i;
-	}
+    int max_index = 0;
+    for (int i=3; i < s.length(); i++) {
+		if (lcp[i] > max) {
+		   int c1 = p[i-1].second < margin? 0 : 1;
+		   int c2 = p[i].second < margin? 0 : 1;
+		   if (c1 != c2){
+		       max = lcp[i];
+		       max_index = i;
+		   }
+			
+		}
     }
+    string lcs = "";//+s.substr(p[max_index].second, lcp[max_index]);
+    int a = p[max_index-1].second;//+lcp[max_index];
+    int b = p[max_index].second;//+lcp[max_index];
+    while(s[a] == s[b] && a < s.length() && b < s.length()){
+		lcs += s[a];
+		a++; b++;
+    }
+    return lcs;
 }
 
 int main() {
@@ -151,8 +163,8 @@ int main() {
     string s1;
     string s2;
     cin >> s1;
-    cin >> s2
-    s = s1+"#"+s2+"$";
+    cin >> s2;
+    s = s1+"%"+s2+"$";
     int n = s.size();
     vector<pair<char, int>> a(n);
     for (int i = 0; i < n; i++) {
@@ -198,4 +210,5 @@ int main() {
         k *= 2;
     }
     vector<int> lcp = LCP(s, p, c);
+    cout << LCS(s, s1, s2, p, lcp);
 }
