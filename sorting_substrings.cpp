@@ -109,7 +109,7 @@ int substring_search(string &original, string &query, vector<pair<pair<int, int>
     return 0;
 }
  
-vector<int> LCP(string &s, vector<pair<pair<int, int>, int>> &p, int* c) {
+vector<int> LCP(string &s, vector<pair<pair<int, int>, int>> &p, vector<int> c) {
     int k = 0;
     int n = s.length();
     vector<int> lcp(n);
@@ -159,75 +159,39 @@ string LCS(string &s, string &s1, string &s2, vector<pair<pair<int, int>, int>> 
  
 class Substring_comparer {
     private:
-    vector<int> lcp;
-    int* c;
-    //vector<vector<int>> C;
-    string s;
+    vector<vector<int>>& C;
     
     public:
-    Substring_comparer(vector<int> &lcp, int* c,
-    //vector<vector<int>> &C,
-    string &s) {
-        this->lcp = lcp;
-        this->c = c;
-        //this->C = C;
-        this->s = s;
+    Substring_comparer(vector<vector<int>> &C):C{C} {
+    }
+
+    
+    int compare(int l_a, int l_b, int l, int k, int len_a, int len_b){
+        pair<int, int> a = {C[k][l_a], C[k][(l_a+l-int(1<<k))]};
+        pair<int, int> b = {C[k][l_b], C[k][(l_b+l-int(1<<k))]}; 
+        if (a < b) return -1;
+        else if (a == b)
+            return len_a==len_b? 0 : len_a < len_b? -1 : 1;
+        else return 1;
     }
     
-    int lcp_of_two_distant_suffixes(int l_a, int l_b) {
-        int p_a = c[l_a];
-        int p_b = c[l_b];
-        int low = min(p_a, p_b)+1;
-        int high = max(p_a, p_b);
-        int minimum = lcp[low];
-        for (int i = low+1; i < high+1; i++) {
-            if (minimum == 0) return minimum;
-            if (lcp[i] < minimum){
-                minimum = lcp[i];
-            }
-        }
-        return minimum;
-    }
     
-    bool operator()(pair<int, int> a, pair<int, int> b) {
-        int len_a = a.second - a.first+1;
-        int len_b = b.second - b.first+1;
-        
+    bool operator()(pair<int, int> &a, pair<int, int> &b) {
+        int len_a = a.second - a.first + 1;
+        int len_b = b.second - b.first + 1;
+        int min_len = min(len_a, len_b);
         // when first position is equal
-        if (a.first == b.first) {
+        if (a.first == b.first)
             return a.second < b.second;
-        }
+        int k = int(log2(min_len));
         
-        // when first position is not equal
-        // and both are of same length
-        else if (len_a == len_b) {
-            int l = lcp_of_two_distant_suffixes(a.first, b.first);
-            if (l >= len_a) {
-                //means both substrings are equal
-                return a < b;//? -1 : 1;
-            }
-            else {
-                // same length, but different substrings
-                return s[a.first+l] < s[b.first+l];
-            }
-        }
-        
-        //now, let's deal with the case where,
-        //starting positions are different as well as
-        //the length of both substrings are different
-        else {
-            int min_len = min(len_a, len_b);
-            int l = lcp_of_two_distant_suffixes(a.first, b.first);
-            if (l >= min_len)
-                return len_a < len_b;//? -1 : 1;
-            else {
-                return s[a.first+l] < s[b.first+l];
-            }
-        }
-        
+        int comparison = compare(a.first, b.first, min_len, k, len_a, len_b);
+        if (comparison == 0)
+            return a < b;
+        return comparison < 0;
     }
 };
- 
+
 int main() {
     string s;
     string s1;
@@ -243,22 +207,20 @@ int main() {
     radix_sort(a);
     vector<pair<pair<int, int>, int>> p(n);
     p[0].second = a[0].second;
-    int c[n];
-    int C[int(log2(n))+1][n];
+    vector<int> c(n);
+    vector<vector<int>> C;
     
     c[a[0].second] = 0;
-    C[0][a[0].second] = 0;
     for (int i = 1; i < n; i++) {
         if (a[i].first == a[i-1].first){
             c[a[i].second] = c[a[i-1].second];
-            C[0][a[i].second] = c[a[i-1].second];
         }
         else{
             c[a[i].second] = c[a[i-1].second] + 1;
-            C[0][a[i].second] = c[a[i-1].second] + 1;
         }
         p[i].second = a[i].second;
     }
+    C.push_back(c);
     int k = 1;
     while(k < n) {
         for (int i = 0; i < n; i++) {
@@ -276,17 +238,15 @@ int main() {
         
         count_sort(p);
         c[p[0].second] = 0;
-        C[int(log2(k))+1][p[0].second] = 0;
         for (int i = 1; i < n; i++) {
             if (p[i].first == p[i-1].first){
                 c[p[i].second] = c[p[i-1].second];
-                C[int(log2(k))+1][p[i].second] = c[p[i-1].second];
             }
             else {
                 c[p[i].second] = c[p[i-1].second]+1;
-                C[int(log2(k))+1][p[i].second] = c[p[i-1].second] + 1;
             }
         }
+        C.push_back(c);
         k *= 2;
     }
     int number_of_pairs;
@@ -300,13 +260,13 @@ int main() {
         substring_container[i].first = l-1;
         substring_container[i].second = r-1;
     }
-    vector<int> lcp = LCP(s, p, c);
-    Substring_comparer SC = Substring_comparer(lcp, c, s);
+    Substring_comparer SC = Substring_comparer(C);
     sort(substring_container.begin(), substring_container.end(), SC);
     for (auto i : substring_container) {
         cout << i.first+1 << " " << i.second+1 << endl;
     }
-    /*for (int i = 0; i < int(log2(n))+1; i++) {
+    /*
+    for (int i = 0; i < C.size(); i++) {
         for (int j = 0; j < n; j++) {
             cout << C[i][j] << " ";
         }
