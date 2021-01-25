@@ -63,29 +63,5 @@ struct Segtree {
 };
 
 int main() {
-    int n, m;
-    cin >> n >> m;
-    vector<long long> leaves(n);
-    for (int i = 0; i < n; i++) {
-        cin >> leaves[i];
-    }
-    Segtree st;
-    st.init(n);
-    st.build(leaves);
-    for (int i = 0; i < m; i++) {
-        int k;
-        cin >> k;
-        if (k == 1) {
-            int l;
-            long long v;
-            cin >> l;
-            cin >> v;
-            st.set(l, v);
-        }
-        else {
-            int l, r;
-            cin >> l >> r;
-            cout << st.sum(l, r) << endl;
-        }
-    }
+    
 }
